@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { ApolloProvider } from "@apollo/client";
 import { BrowserRouter as Router } from "react-router-dom";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
@@ -6,9 +6,8 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { client } from "./apollo-client";
 import Header from "./components/Header";
 import RepositoryList from "./components/RepositoryList";
-import RepositoryDetails from "./components/RepositoryDetails";
 import AddRepository from "./components/AddRepository";
-import { Box, Container, Grid, Paper } from "@mui/material";
+import { Box, Container } from "@mui/material";
 
 // Define theme for Material UI components
 const theme = createTheme({

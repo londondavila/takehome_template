@@ -1,89 +1,87 @@
-# 🚀 Takehome Template
+# 🚀 Github Repo Tracker
 
-> The repo no one should need, but everyone does.
-
-## 📋 How to Use It
-
-This repo has a variety of templates for different takehome formats.
-
-The main branch is a general template with just a README and a couple of files for languages you might use.
-
-Each sub-branch is designed to be **composable via merge**.
+Hello Aspire team! 👋 This is pretty backend-focused, so the UI has a bit of tweaking to do. Functionality first!
 
 ### ⚙️ Setup
 
-- Fork the repo for yourself in the web or cli, then clone it.
-  ```bash
-  git clone https://github.com/<username>/takehome_template.git
-  cd takehome_template
-  ```
+First off, you'll need the following installed, set up, and ready to rock:
+- GitHub personal API token (classic is fine)
+- Node + NPM
+- Docker
+- just
 
-- Now set up a branch for your takehome. Follow your heart here, or try this format.
-  ```bash
-  git checkout -b <username>/<company-name>/main
-  ```
+*Note: this project can be run manually, but it is recommended to use **just** and Docker for simplicity.*
 
-### 🛠️ Development Commands
+Now, fork the repo for yourself in the web or cli, then clone it.
 
-Each framework supports these core commands:
+### 1. Clone the repo
 ```bash
-just dev <framework>     # Start development server
-just docker <framework>  # Run in Docker
-just install <framework> # Install dependencies
-just start <framework>   # Quick start: install + dev
+# special thanks to my friend and confidant Andrew Bogle
+git clone git@github.com:londondavila/takehome_template.git && cd takehome_template && git checkout london/aspire
 ```
 
-For example:
+### 2. Set up API token
+Need help getting this? Check out this article from GitHub: https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
+
 ```bash
-just dev node      # Start Node.js server
-just docker react  # Run React app in Docker
-just start django  # Install and start Django
+echo 'GITHUB_TOKEN=your_token_here' > node_server/.env
 ```
 
-### 🔍 Examples
+### 3. Initialize and run database
+```bash
+just docker db
+```
 
-- If you have a problem with a few algo/DSA challenges, branch off main and get to work!
+### 4. Run backend server
+```bash
+just dev node
+```
 
-- If you need a backend, database, or a particular frontend, merge in the branch and start coding:
-  ```bash
-  # Add React frontend
-  just add react
-  just start react
+### 5. Run frontend
+```bash
+just dev react
+```
+
+## Usage
+1. Head on over to http://localhost:5173 in your browser.
+2. Add repositories by GitHub URL.
+3. View, refresh, and delete releases for each repository.
+
+### Troubleshooting
+
+Running into issues? Try the following:
+- **Database connection errors**: Ensure Docker is running and the database is initialized
+- **GitHub API errors**: Make sure your `GITHUB_TOKEN` is valid and has the necessary selections
+- **Port conflicts**: Check and change the ports in `.env` files or `docker-compose.yml` if needed
+
+Also, check out them `console.log` outputs in the Node server window. Those will point you in the right direction.
+
+## 📝 Implementation Details
+
+### ✅ Requirements Fulfilled
+
+#### ✔️ Track Repositories
+Users can add GitHub repository URLs to track their updates
+- Repository and release data are stored in PostgreSQL
+- Add and persistently track GitHub repositories
+- Tracked repos can be deleted
   
-  # Add Node.js backend
-  just add node
-  just start node
-  ```
+#### ✔️ Latest Release Details
+Display repository name, description, and the latest release version and date.
+- Repository name and latest release tag/date are shown in the list and details view
 
-- For full-stack applications, compose multiple branches:
-  ```bash
-  # React frontend + Node.js backend
-  just add react
-  just add node
-  just start react  # Start frontend
-  just start node   # Start backend
-  ```
+#### ✔️ Mark as Seen
+Unseen releases are marked with a "new" chip and a red border
+- Users can mark a release as "seen" and vice versa
+- Repositories with unseen updates are visually distinct
 
-- For backend-focused or database-heavy takehomes:
-  ```bash
-  # Node.js + Database setup
-  just add node
-  just add db
-  just start node
-  just start db
-  ```
+#### ✔️ Data Reload
+Users can manually refresh the repository list to fetch the latest data.
+- There is a refresh button on each repository card
 
-## 🌿 Available Branches
-
-| Branch | Description | Commands |
-|--------|-------------|----------|
-| `main → react` | Scaffolded with a basic React app | `just * react` |
-| `main → vue` | Scaffolded with a basic Vue app | `just * vue` |
-| `main → go` | Scaffolded with a basic Go app | `just * go` |
-| `main → django` | Scaffolded with a basic Django app | `just * django` |
-| `main → node` | Scaffolded with a basic Node.js app | `just * node` |
-| `main → postgres` | Scaffolded with a basic PostgreSQL database | `just * postgres` |
-| `main → mongo` | Scaffolded with a basic MongoDB database | `just * mongo` |
-| `main → LLM` | Scaffolded with a basic LLM app | `just * llm` |
-
-
+### Improvements and trade-offs:
+- No authentication or user-specific tracking.
+- Better styling, mobile functionality.
+- Centralized just script or `docker-compose.yml` for deploying all three components at once (DB, BE, and FE).
+- All data is fetched live from GitHub and stored in PostgreSQL. Would be nice to have better testing in the form of a DB entry for "repositories" without any release.
+- Further cleanup of repo structure, utils, etc.
