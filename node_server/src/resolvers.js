@@ -3,7 +3,6 @@ const { parseGitHubUrl } = require("./utils");
 const resolvers = {
   Query: {
     repositories: async (_, __, context) => {
-      // console.log("Context in repositories resolver:", context);
       try {
         const { pool } = context;
 
@@ -11,14 +10,12 @@ const resolvers = {
           throw new Error("Database connection pool is not defined in context");
         }
 
-        // Log the current database and schema
         const dbInfoResult = await pool.query(
           "SELECT current_database(), current_schema"
         );
         console.log("Current DB:", dbInfoResult.rows[0].current_database);
         console.log("Current Schema:", dbInfoResult.rows[0].current_schema);
 
-        // Check if the repositories table exists
         const tableCheckResult = await pool.query(
           "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'repositories')"
         );
@@ -27,7 +24,6 @@ const resolvers = {
           tableCheckResult.rows[0].exists
         );
 
-        // If table doesn't exist in the current schema, try public schema explicitly
         if (!tableCheckResult.rows[0].exists) {
           const publicSchemaCheck = await pool.query(
             "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'repositories')"
@@ -85,7 +81,6 @@ const resolvers = {
 
   Repository: {
     releases: async ({ id }, _, { pool }) => {
-      // Fetch releases associated with the repository ID
       const result = await pool.query(
         "SELECT * FROM releases WHERE repository_id = $1 ORDER BY created_at DESC",
         [id]
@@ -111,17 +106,14 @@ const resolvers = {
 
       const client = await pool.connect();
       try {
-        // Parse owner and repo name from the URL
         const { owner, name } = parseGitHubUrl(url);
         console.log(`Adding repository ${owner}/${name}`);
 
-        // Fetch repository details from GitHub
         const { data: repo } = await octokit.repos.get({
           owner,
           repo: name,
         });
 
-        // Check if the repository already exists
         const existingRepo = await client.query(
           "SELECT * FROM repositories WHERE name = $1 AND url = $2",
           [repo.name, repo.html_url]
@@ -132,7 +124,6 @@ const resolvers = {
           return existingRepo.rows[0];
         }
 
-        // Check table structure to determine correct columns
         const tableInfoResult = await client.query(`
           SELECT column_name 
           FROM information_schema.columns 
@@ -143,20 +134,9 @@ const resolvers = {
         const columns = tableInfoResult.rows.map((row) => row.column_name);
         console.log("Repository table columns:", columns);
 
-        // Insert the repository into the database based on available columns
-        let query;
-        let params;
-
-        if (columns.includes("github_id") && columns.includes("owner")) {
-          query = `INSERT INTO repositories (github_id, name, owner, url) 
-                   VALUES ($1, $2, $3, $4) RETURNING *`;
-          params = [repo.id, repo.name, owner, repo.html_url];
-        } else {
-          // Simplified version for the minimal schema
-          query = `INSERT INTO repositories (name, owner, url) 
-                   VALUES ($1, $2, $3) RETURNING *`;
-          params = [repo.name, owner, repo.html_url];
-        }
+        query = `INSERT INTO repositories (name, owner, url) 
+                  VALUES ($1, $2, $3) RETURNING *`;
+        params = [repo.name, owner, repo.html_url];
 
         console.log("Executing query:", query);
         console.log("With params:", params);
@@ -165,7 +145,6 @@ const resolvers = {
         const newRepo = result.rows[0];
         console.log("New repository added:", newRepo);
 
-        // Fetch releases only if releases table exists
         const releasesTableExists = await client.query(`
           SELECT EXISTS (
             SELECT FROM information_schema.tables 
@@ -181,7 +160,6 @@ const resolvers = {
               per_page: 10,
             });
 
-            // Insert releases into the database
             for (const release of releases) {
               await client.query(
                 `INSERT INTO releases
@@ -207,7 +185,6 @@ const resolvers = {
               `Could not fetch releases for ${owner}/${name}:`,
               releaseError.message
             );
-            // Continue even if releases can't be fetched
           }
         } else {
           console.log(
@@ -265,85 +242,10 @@ const resolvers = {
       }
     },
 
-    // refreshRepositories: async (_, __, { pool, octokit }) => {
-    //   const client = await pool.connect();
-
-    //   try {
-    //     // Fetch all repositories from the database
-    //     const reposResult = await client.query("SELECT id, name, url FROM repositories");
-    //     const repositories = reposResult.rows;
-    //     console.log("Repositories to refresh:", repositories);
-
-    //     for (const repo of repositories) {
-    //       try {
-    //         console.log(`Refreshing repository ${repo.name}`);
-    //         console.log(`\nREPO OWNER ${repo.owner}\n`);
-    //         // Fetch the latest release from GitHub
-    //         const { data: latestRelease } = await octokit.repos.getLatestRelease({
-    //           owner: repo.owner,
-    //           repo: repo.name,
-    //         });
-    //         console.log(`Latest release for ${repo.name}:`, latestRelease);
-
-    //         // Check if the release already exists in the database
-    //         const releaseExists = await client.query(
-    //           "SELECT id FROM releases WHERE repository_id = $1 AND release_id = $2",
-    //           [repo.id, latestRelease.id.toString()]
-    //         );
-
-    //         if (releaseExists.rows.length === 0) {
-    //           // Insert the new release into the database
-    //           await client.query(
-    //             `INSERT INTO releases
-    //              (repository_id, release_id, tag_name, name, body, published_at, html_url)
-    //              VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-    //             [
-    //               repo.id,
-    //               latestRelease.id.toString(),
-    //               latestRelease.tag_name,
-    //               latestRelease.name || "",
-    //               latestRelease.body || "",
-    //               latestRelease.published_at,
-    //               // latestRelease.html_url,
-    //             ]
-    //           );
-    //         } else {
-    //           // Update the existing release if necessary
-    //           await client.query(
-    //             `UPDATE releases
-    //              SET tag_name = $1, name = $2, body = $3, published_at = $4, html_url = $5
-    //              WHERE repository_id = $6 AND release_id = $7`,
-    //             [
-    //               latestRelease.tag_name,
-    //               latestRelease.name || "",
-    //               latestRelease.body || "",
-    //               latestRelease.published_at,
-    //               // latestRelease.html_url,
-    //               repo.id,
-    //               latestRelease.id.toString(),
-    //             ]
-    //           );
-    //         }
-    //       } catch (error) {
-    //         console.error(`Failed to refresh repository ${repo.name}:`, error.message);
-    //         // Continue with the next repository
-    //       }
-    //     }
-
-    //     return true;
-    //   } catch (error) {
-    //     console.error("Error refreshing repositories:", error);
-    //     throw new Error("Failed to refresh repositories");
-    //   } finally {
-    //     client.release();
-    //   }
-    // },
-
     refreshRepository: async (_, { id }, { pool, octokit }) => {
       const client = await pool.connect();
 
       try {
-        // Fetch the repository details from the database
         const repoResult = await client.query(
           "SELECT id, owner, name FROM repositories WHERE id = $1",
           [id]
@@ -355,12 +257,10 @@ const resolvers = {
 
         const repo = repoResult.rows[0];
 
-        // Fetch the latest release from GitHub
         const { data: latestRelease } = await octokit.repos.getLatestRelease({
           owner: repo.owner,
           repo: repo.name,
         });
-        // Check if the release already exists in the database
         const releaseExists = await client.query(
           "SELECT id FROM releases WHERE repository_id = $1 AND id = $2",
           [repo.id, latestRelease.id.toString()]
@@ -369,7 +269,6 @@ const resolvers = {
         console.log(releaseExists);
 
         if (releaseExists.rows.length === 0) {
-          // Insert the new release into the database
           await client.query(
             `INSERT INTO releases
              (repository_id, id, tag_name, name, body, published_at)
@@ -384,7 +283,6 @@ const resolvers = {
             ]
           );
         } else {
-          // Update the existing release if necessary
           await client.query(
             `UPDATE releases
              SET tag_name = $1, name = $2, body = $3, published_at = $4

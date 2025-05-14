@@ -36,10 +36,3 @@ export const REFRESH_REPOSITORY = gql`
     refreshRepository(id: $id)
   }
 `;
-
-// TODO
-// export const REFRESH_REPOSITORIES = gql`
-//   mutation RefreshRepositories {
-//     refreshRepositories
-//   }
-// `;

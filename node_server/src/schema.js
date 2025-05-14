@@ -31,7 +31,6 @@ const typeDefs = gql`
     addRepository(url: String!): Repository!
     removeRepository(id: ID!): Boolean!
     toggleReleaseSeen(id: ID!): Release!
-    # refreshRepositories: Boolean! TODO
     refreshRepository(id: ID!): Boolean!
   }
 `;

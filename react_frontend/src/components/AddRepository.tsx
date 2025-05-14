@@ -7,14 +7,14 @@ import { Box, TextField, Button, Typography } from "@mui/material";
 const AddRepository: React.FC = () => {
   const [url, setUrl] = useState("");
   const [addRepository, { loading, error }] = useMutation(ADD_REPOSITORY, {
-    refetchQueries: [{ query: GET_REPOSITORIES }], // Refetch repositories after adding
+    refetchQueries: [{ query: GET_REPOSITORIES }],
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await addRepository({ variables: { url } });
-      setUrl(""); // Clear the input field
+      setUrl("");
     } catch (err) {
       console.error("Error adding repository:", err);
     }

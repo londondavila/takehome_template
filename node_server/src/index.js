@@ -4,14 +4,10 @@ const cors = require("cors");
 const { ApolloServer } = require("@apollo/server");
 const { expressMiddleware } = require("@apollo/server/express4");
 const { json } = require("body-parser");
-const { GraphQLDateTime } = require("graphql-scalars");
 const { Pool } = require("pg");
 const { Octokit } = require("@octokit/rest");
-const { createServer } = require("http");
-const cron = require("node-cron");
 const { typeDefs } = require("./schema");
 const { resolvers } = require("./resolvers");
-const { parseGitHubUrl } = require("./utils");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -19,7 +15,6 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
-// Configure PostgreSQL connection
 const pool = new Pool({
   user: "postgres",
   host: "localhost",
@@ -28,7 +23,6 @@ const pool = new Pool({
   port: 5432,
 });
 
-// Test the database connection
 pool.query("SELECT NOW(), current_database()", (err, res) => {
   if (err) {
     console.error("Error connecting to the database:", err);
@@ -36,7 +30,6 @@ pool.query("SELECT NOW(), current_database()", (err, res) => {
     console.log("Database connected:", res.rows[0]);
     console.log("Current database:", res.rows[0].current_database);
 
-    // Check if repositories table exists
     pool.query(
       "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'repositories')",
       (tableErr, tableRes) => {
@@ -50,12 +43,10 @@ pool.query("SELECT NOW(), current_database()", (err, res) => {
   }
 });
 
-// Initialize Octokit with GitHub token
 const octokit = new Octokit({
   auth: process.env.GITHUB_TOKEN,
 });
 
-// Initialize Apollo Server
 const server = new ApolloServer({
   typeDefs,
   resolvers,
@@ -66,15 +57,9 @@ const server = new ApolloServer({
   includeStacktraceInErrorResponses: process.env.NODE_ENV !== "production",
 });
 
-// Basic health check endpoint
-app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
-});
-
 async function startServer() {
   await server.start();
 
-  // Important: Use expressMiddleware correctly and pass the context
   app.use(
     "/graphql",
     cors(),

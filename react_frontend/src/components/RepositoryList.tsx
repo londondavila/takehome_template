@@ -21,7 +21,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 const RepositoryList: React.FC = () => {
   const { loading, error, data } = useQuery(GET_REPOSITORIES);
   const [removeRepository] = useMutation(REMOVE_REPOSITORY, {
-    refetchQueries: [{ query: GET_REPOSITORIES }], // Refetch repositories after deletion
+    refetchQueries: [{ query: GET_REPOSITORIES }],
   });
   const [refreshRepository, { loading: refreshing }] = useMutation(
     REFRESH_REPOSITORY,
@@ -36,12 +36,10 @@ const RepositoryList: React.FC = () => {
   };
 
   const handleRemoveRepo = async (repoId: string, event: React.MouseEvent) => {
-    // prevent click event from bubbling up to the card action area
     event.stopPropagation();
 
     try {
       await removeRepository({ variables: { id: repoId } });
-      // if the deleted repo selected, clear selection
       if (selectedRepo && selectedRepo.id === repoId) {
         setSelectedRepo(null);
       }
@@ -82,9 +80,8 @@ const RepositoryList: React.FC = () => {
   return (
     <Container maxWidth="lg" disableGutters>
       <Box my={4} display="flex" gap={4}>
-        {/* master-detail layout container */}
         <Grid container spacing={3}>
-          {/* repository list */}
+          ={" "}
           <Grid item xs={12} md={5} lg={4}>
             <Paper elevation={1} sx={{ p: 3, height: "100%" }}>
               <Typography variant="h5" component="h2" gutterBottom>
@@ -114,8 +111,7 @@ const RepositoryList: React.FC = () => {
                             : selectedRepo?.id === repo.id
                             ? "primary.main"
                             : "divider"
-                          : // if selected and no latestRelease
-                          selectedRepo?.id === repo.id
+                          : selectedRepo?.id === repo.id
                           ? "primary.main"
                           : "divider",
                       }}
@@ -169,8 +165,6 @@ const RepositoryList: React.FC = () => {
               )}
             </Paper>
           </Grid>
-
-          {/* repository details - right */}
           <Grid item xs={12} md={7} lg={8}>
             <Paper
               elevation={1}
