@@ -10,7 +10,7 @@ First off, you'll need the following installed, set up, and ready to rock:
 - Docker
 - just
 
-*Note: this project can be run manually, but it is recommended to use **just** and Docker for simplicity.*
+*Note: this project can be run manually, but it is recommended to use Docker Compose for simplicity.*
 
 Now, fork the repo for yourself in the web or cli, then clone it.
 
