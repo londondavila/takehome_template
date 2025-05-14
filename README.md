@@ -30,6 +30,7 @@ echo 'GITHUB_TOKEN=your_token_here' > node_server/.env
 ### 3. Initialize and run database
 ```bash
 just docker db
+just init db
 ```
 
 ### 4. Run backend server
