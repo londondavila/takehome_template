@@ -12,7 +12,7 @@ First off, you'll need the following installed, set up, and ready to rock:
 
 *Note: this project can be run manually, but it is recommended to use Docker Compose for simplicity.*
 
-Now, fork the repo for yourself in the web or cli, then clone it.
+Let's get started.
 
 ### 1. Clone the repo
 ```bash
