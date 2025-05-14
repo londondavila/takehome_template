@@ -7,7 +7,7 @@ dev:
         echo "⚠️ .env file not found, creating from template..." && \
         cp .env.example .env; \
     fi && \
-    docker compose up
+    docker compose up -d
 
 # Run database in background (Docker)
 docker:
@@ -15,14 +15,14 @@ docker:
 
 # Stop database (Docker)
 stop:
-    cd ../db_server && docker compose down
+    cd ../db_server && docker compose down -v
 
 # Initialize database with schema
 init:
     cd ../db_server && \
     if [ -f ".env" ]; then \
-        . .env && \
-        PGPASSWORD=$$POSTGRES_PASSWORD psql -h $$POSTGRES_HOST -p $$POSTGRES_PORT -U $$POSTGRES_USER -d $$POSTGRES_DB -f init/01_schema.sql; \
+        export $(grep -v '^#' .env | xargs) && \
+        docker exec -i app_postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" < init/01_schema.sql; \
     else \
         echo "⚠️ .env file not found"; \
         exit 1; \
@@ -32,9 +32,12 @@ init:
 reset:
     cd ../db_server && \
     if [ -f ".env" ]; then \
-        . .env && \
-        PGPASSWORD=$$POSTGRES_PASSWORD psql -h $$POSTGRES_HOST -p $$POSTGRES_PORT -U $$POSTGRES_USER -d postgres -c "DROP DATABASE IF EXISTS $$POSTGRES_DB" && \
-        PGPASSWORD=$$POSTGRES_PASSWORD psql -h $$POSTGRES_HOST -p $$POSTGRES_PORT -U $$POSTGRES_USER -d postgres -c "CREATE DATABASE $$POSTGRES_DB" && \
+        export $(grep -v '^#' .env | xargs) && \
+        echo "⏳ Waiting for database to be ready..." && \
+        until docker exec app_postgres pg_isready -U "$POSTGRES_USER" > /dev/null 2>&1; do sleep 1; done && \
+        echo "Dropping and recreating database..." && \
+        docker exec -u postgres app_postgres psql -c "DROP DATABASE IF EXISTS $POSTGRES_DB;" && \
+        docker exec -u postgres app_postgres psql -c "CREATE DATABASE $POSTGRES_DB;" && \
         just db init; \
     else \
         echo "⚠️ .env file not found"; \

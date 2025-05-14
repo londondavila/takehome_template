@@ -23,7 +23,7 @@ app.use(express.json());
 const pool = new Pool({
   user: "postgres",
   host: "localhost",
-  database: "postgres", // Changed from app_db to postgres to match your actual database
+  database: "app_db",
   password: "postgres",
   port: 5432,
 });

@@ -31,6 +31,18 @@ dev framework:
 docker framework:
     @just --justfile scripts/{{framework}}.just docker
 
+# Run in docker
+init framework:
+    @just --justfile scripts/{{framework}}.just init
+
+# Reset DB
+reset framework:
+    @just --justfile scripts/{{framework}}.just reset
+
+# Stop docker
+stop framework:
+    @just --justfile scripts/{{framework}}.just stop
+
 # Install dependencies
 install framework:
     @just --justfile scripts/{{framework}}.just install
