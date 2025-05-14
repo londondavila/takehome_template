@@ -10,26 +10,35 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Create users table
-CREATE TABLE IF NOT EXISTS users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(255),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- Create the repositories table
+CREATE TABLE IF NOT EXISTS repositories (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    owner VARCHAR(255),
+    CONSTRAINT repositories_pkey PRIMARY KEY (id)
 );
 
--- Add updated_at trigger to users
-CREATE TRIGGER set_timestamp
-    BEFORE UPDATE ON users
-    FOR EACH ROW
-    EXECUTE FUNCTION trigger_set_timestamp();
+-- Create an index on the id column for faster lookups (already implied by PRIMARY KEY)
+CREATE INDEX IF NOT EXISTS idx_repositories_id ON repositories(id);
 
--- Create index on email
-CREATE INDEX IF NOT EXISTS users_email_idx ON users(email);
+-- Create the releases table
+CREATE TABLE IF NOT EXISTS releases (
+    id SERIAL PRIMARY KEY,
+    repository_id INTEGER NOT NULL, -- repositories table
+    name TEXT NOT NULL,
+    body TEXT NOT NULL,
+    seen BOOLEAN NOT NULL DEFAULT FALSE,
+    tag_name TEXT,
+    created_at VARCHAR(255),
+    published_at VARCHAR(255),
+    CONSTRAINT fk_repository FOREIGN KEY (repository_id) REFERENCES repositories(id) ON DELETE CASCADE
+);
+
+-- Create an index on repository_id for faster lookups
+CREATE INDEX IF NOT EXISTS idx_releases_repository_id ON releases(repository_id);
 
 -- Insert some sample data
-INSERT INTO users (email, name) VALUES
-    ('admin@example.com', 'Admin User'),
-    ('test@example.com', 'Test User')
-ON CONFLICT (email) DO NOTHING; 
+INSERT INTO repositories (name, url, owner) VALUES
+    ('react', 'https://github.com/facebook/react', 'facebook'),
+ON CONFLICT (owner) DO NOTHING; 

@@ -1,24 +1,68 @@
-import { useState } from "react";
+import React, { useState } from "react";
+import { ApolloProvider } from "@apollo/client";
+import { BrowserRouter as Router } from "react-router-dom";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { client } from "./apollo-client";
+import Header from "./components/Header";
+import RepositoryList from "./components/RepositoryList";
+import RepositoryDetails from "./components/RepositoryDetails";
+import AddRepository from "./components/AddRepository";
+import { Box, Container, Grid, Paper } from "@mui/material";
+
+// Define theme for Material UI components
+const theme = createTheme({
+  palette: {
+    mode: "light",
+    primary: {
+      main: "#2c387e",
+    },
+    secondary: {
+      main: "#f50057",
+    },
+  },
+  typography: {
+    fontFamily: [
+      "-apple-system",
+      "BlinkMacSystemFont",
+      '"Segoe UI"',
+      "Roboto",
+      '"Helvetica Neue"',
+      "Arial",
+      "sans-serif",
+    ].join(","),
+  },
+});
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          React + TypeScript + Vite
-        </h1>
-        <div className="p-4">
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            onClick={() => setCount((count) => count + 1)}
-          >
-            Count is: {count}
-          </button>
-        </div>
-      </div>
-    </div>
+    <ApolloProvider client={client}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <Router>
+          <div className="flex flex-col min-h-screen bg-gray-50">
+            <Header />
+            <main className="flex-1">
+              <Container maxWidth="lg">
+                {/* AddRepository Form */}
+                <Box my={4}>
+                  <AddRepository />
+                </Box>
+
+                {/* Integrated Repository List and Details */}
+                <Box my={4}>
+                  <RepositoryList />
+                </Box>
+              </Container>
+            </main>
+            <footer className="bg-gray-100 border-t border-gray-200 p-2 text-center text-xs text-gray-500">
+              GitHub Repository Tracker | TypeScript + React + GraphQL +
+              PostgreSQL
+            </footer>
+          </div>
+        </Router>
+      </ThemeProvider>
+    </ApolloProvider>
   );
 }
 
