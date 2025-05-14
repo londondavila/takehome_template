@@ -81,7 +81,6 @@ const RepositoryList: React.FC = () => {
     <Container maxWidth="lg" disableGutters>
       <Box my={4} display="flex" gap={4}>
         <Grid container spacing={3}>
-          ={" "}
           <Grid item xs={12} md={5} lg={4}>
             <Paper elevation={1} sx={{ p: 3, height: "100%" }}>
               <Typography variant="h5" component="h2" gutterBottom>

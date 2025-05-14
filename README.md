@@ -27,6 +27,15 @@ Need help getting this? Check out this article from GitHub: https://docs.github.
 echo 'GITHUB_TOKEN=your_token_here' > node_server/.env
 ```
 
+### 3. Run everything
+**Recommended** to just use Docker Compose and make life a bit easier for yourself.
+
+```bash
+docker compose up -d
+```
+
+<details><summary>Manual Setup</summary>
+
 ### 3. Initialize and run database
 ```bash
 just docker db
@@ -42,6 +51,7 @@ just dev node
 ```bash
 just dev react
 ```
+</details>
 
 ## Usage
 1. Head on over to http://localhost:5173 in your browser.
