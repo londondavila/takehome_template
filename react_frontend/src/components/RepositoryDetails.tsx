@@ -12,7 +12,6 @@ import {
   CardContent,
   Button,
 } from "@mui/material";
-import LaunchIcon from "@mui/icons-material/Launch";
 import TagIcon from "@mui/icons-material/LocalOffer";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import { format } from "date-fns";
@@ -21,7 +20,7 @@ interface RepositoryDetailsProps {
   id: string;
 }
 
-const RepositoryDetails: React.FC<RepositoryDetailsProps> = ({ id }) => {
+function RepositoryDetails({ id }: RepositoryDetailsProps) {
   const { loading, error, data } = useQuery(GET_LATEST_RELEASE, {
     variables: { id },
     skip: !id,

@@ -16,7 +16,6 @@ Let's get started.
 
 ### 1. Clone the repo
 ```bash
-# special thanks to my friend and confidant Andrew Bogle
 git clone git@github.com:londondavila/takehome_template.git && cd takehome_template && git checkout london/aspire
 ```
 
