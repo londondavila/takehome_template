@@ -3,7 +3,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { AppBar, Toolbar, Typography, Container } from "@mui/material";
 import GitHubIcon from "@mui/icons-material/GitHub";
 
-const Header: React.FC = () => {
+function Header() {
   return (
     <AppBar position="static">
       <Container>

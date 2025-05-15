@@ -4,7 +4,7 @@ import { ADD_REPOSITORY } from "../graphql/mutations";
 import { GET_REPOSITORIES } from "../graphql/queries";
 import { Box, TextField, Button, Typography } from "@mui/material";
 
-const AddRepository: React.FC = () => {
+function AddRepository() {
   const [url, setUrl] = useState("");
   const [addRepository, { loading, error }] = useMutation(ADD_REPOSITORY, {
     refetchQueries: [{ query: GET_REPOSITORIES }],

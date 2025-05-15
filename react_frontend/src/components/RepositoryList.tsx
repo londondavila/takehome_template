@@ -1,24 +1,19 @@
 import React, { useState } from "react";
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   Grid,
   Container,
-  CardActionArea,
-  IconButton,
   CircularProgress,
   Paper,
 } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { useQuery, useMutation } from "@apollo/client";
 import { GET_REPOSITORIES } from "../graphql/queries";
 import { REMOVE_REPOSITORY, REFRESH_REPOSITORY } from "../graphql/mutations";
 import RepositoryDetails from "./RepositoryDetails";
-import RefreshIcon from "@mui/icons-material/Refresh";
+import Repository from "./Repository";
 
-const RepositoryList: React.FC = () => {
+function RepositoryList() {
   const { loading, error, data } = useQuery(GET_REPOSITORIES);
   const [removeRepository] = useMutation(REMOVE_REPOSITORY, {
     refetchQueries: [{ query: GET_REPOSITORIES }],
@@ -96,69 +91,15 @@ const RepositoryList: React.FC = () => {
               ) : (
                 <Box mt={2}>
                   {repositories.map((repo: any) => (
-                    <Card
+                    <Repository
                       key={repo.id}
-                      sx={{
-                        mb: 2,
-                        border:
-                          selectedRepo?.id === repo.id
-                            ? "2px solid"
-                            : "1px solid",
-                        borderColor: repo.latestRelease
-                          ? !repo.latestRelease.seen
-                            ? "red"
-                            : selectedRepo?.id === repo.id
-                            ? "primary.main"
-                            : "divider"
-                          : selectedRepo?.id === repo.id
-                          ? "primary.main"
-                          : "divider",
-                      }}
-                    >
-                      <CardActionArea onClick={() => handleSelectRepo(repo)}>
-                        <CardContent>
-                          <Typography variant="h6" component="div" gutterBottom>
-                            {repo.name}
-                          </Typography>
-                          <Typography
-                            variant="body2"
-                            color="textSecondary"
-                            noWrap
-                          >
-                            {repo.latestRelease
-                              ? `${repo.latestRelease.tag_name} ${
-                                  repo.latestRelease.published_at
-                                    ? `(${
-                                        repo.latestRelease.published_at.split(
-                                          "T"
-                                        )[0]
-                                      })`
-                                    : "(No publish date available)"
-                                }`
-                              : "No releases available"}
-                          </Typography>
-                        </CardContent>
-                      </CardActionArea>
-                      <Box display="flex" justifyContent="flex-end" p={1}>
-                        <IconButton
-                          color="primary"
-                          onClick={(e) => handleRefreshRepo(repo.id, e)}
-                          aria-label="refresh repository"
-                          size="small"
-                          disabled={refreshing}
-                        >
-                          <RefreshIcon />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          onClick={(e) => handleRemoveRepo(repo.id, e)}
-                          aria-label="remove repository"
-                          size="small"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-                    </Card>
+                      repo={repo}
+                      isSelected={selectedRepo?.id === repo.id}
+                      onSelect={handleSelectRepo}
+                      onRefresh={handleRefreshRepo}
+                      onRemove={handleRemoveRepo}
+                      refreshing={refreshing}
+                    />
                   ))}
                 </Box>
               )}
@@ -190,6 +131,6 @@ const RepositoryList: React.FC = () => {
       </Box>
     </Container>
   );
-};
+}
 
 export default RepositoryList;
